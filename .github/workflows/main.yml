@@ -11,12 +11,12 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4 # Обновлено до v4 
+      uses: actions/checkout@v4 
     
     - name: Set up Python
-      uses: actions/setup-python@v5 # Обновлено до v5
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11' # Подтянули к твоей локальной версии
+        python-version: '3.11'
     
     - name: Install dependencies
       run: |
@@ -24,16 +24,14 @@ jobs:
         pip install -r requirements.txt
     
     - name: Run Quality Analysis
-      # Запускаем твой main.py, который создаст файл full_report.txt
-      run: python src/main.py 
+
+      run: python src/main.py
     
     - name: Run Tests
-      # Запускаем тесты с проверкой покрытия
       run: pytest --cov=src tests/
         
     - name: Upload Analysis Report
-      # Та самая критическая правка версии v4
       uses: actions/upload-artifact@v4 
       with:
         name: code-quality-report
-        path: full_report.txt # Указываем тот же файл, что в src/main.py
+        path: full_report.txt
