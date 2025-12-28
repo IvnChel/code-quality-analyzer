@@ -13,6 +13,11 @@ class CodeAnalyzer:
         }
 
     def analyze_file(self, filepath):
+        
+        self.report_data.append(f"\n{'='*30}")
+        self.report_data.append(f"АНАЛИЗ ФАЙЛА: {os.path.basename(filepath)}")
+        self.report_data.append(f"{'='*30}\n")
+        
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
             self.metrics["total_lines"] = len(content.splitlines())
