@@ -11,24 +11,34 @@ class CodeAnalyzer:
             "pep8_issues": 0,
             "recommendations": []
         }
+        self.report_data = []
 
     def analyze_file(self, filepath):
-        
         self.report_data.append(f"\n{'='*30}")
         self.report_data.append(f"АНАЛИЗ ФАЙЛА: {os.path.basename(filepath)}")
         self.report_data.append(f"{'='*30}\n")
-        
+
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
             self.metrics["total_lines"] = len(content.splitlines())
         
         tree = ast.parse(content)
         self._analyze_node(tree)
+        self._check_duplicates(filepath)
         self._generate_recommendations()
+
+        m = self.metrics
+        self.report_data.append(f"Строк кода: {m['total_lines']}")
+        self.report_data.append(f"Функций: {m['functions_count']}")
+        self.report_data.append(f"Сложность: {m['complexity']}")
+        self.report_data.append(f"Docstrings: {m['docstrings_count']}/{m['functions_count']}")
+        self.report_data.append("\nРЕКОМЕНДАЦИИ:")
+        self.report_data.extend(m["recommendations"])
+        self.report_data.append("-" * 30)
+
         return self.metrics
 
     def analyze_folder(self, folder_path):
-        import os
         for root, dirs, files in os.walk(folder_path):
             for file in files:
                 if file.endswith(".py"):
@@ -78,15 +88,9 @@ class CodeAnalyzer:
             self.metrics["recommendations"].append("- Обнаружены дублирующиеся строки кода. Проверьте на copy-paste.")
 
     def get_report(self):
-        """Формирует красивый текстовый отчет"""
-        m = self.metrics
-        report = [
-            "=== ОТЧЕТ О КАЧЕСТВЕ КОДА ===",
-            f"Строк кода: {m['total_lines']}",
-            f"Количество функций: {m['functions_count']}",
-            f"Сложность: {m['complexity']}",
-            f"Наличие документации: {m['docstrings_count']}/{m['functions_count']}",
-            "\nРЕКОМЕНДАЦИИ:",
-            *m["recommendations"]
-        ]
-        return "\n".join(report)
+        """Просто возвращает всё, что мы насобирали в report_data"""
+        if not self.report_data:
+            return "Отчет пуст. Файлы не найдены или не проанализированы."
+
+        header = "=== ИТОГОВЫЙ ОТЧЕТ О КАЧЕСТВЕ КОДА ===\n"
+        return header + "\n".join(self.report_data)
