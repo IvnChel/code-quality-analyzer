@@ -3,42 +3,37 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # Позволяет запускать кнопку вручную (+ к карме)
+  workflow_dispatch: 
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v4 # Обновлено до v4 
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5 # Обновлено до v5
       with:
-        python-version: '3.9'
+        python-version: '3.11' # Подтянули к твоей локальной версии
     
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
-    - name: Lint with flake8
-      run: |
-        # Проверяем на ошибки стиля, но не валим сборку (exit-zero)
-        flake8 src tests --count --select=E9,F63,F7,F82 --show-source --statistics
+    - name: Run Quality Analysis
+      # Запускаем твой main.py, который создаст файл full_report.txt
+      run: python src/main.py 
     
     - name: Run Tests
+      # Запускаем тесты с проверкой покрытия
       run: pytest --cov=src tests/
-      
-    # === ВОТ ЭТО КРЕАТИВНАЯ ЧАСТЬ (Artifact Upload) ===
-    - name: Generate Report
-      run: |
-        echo "Build Success!" > report.txt
-        date >> report.txt
-        echo "All tests passed." >> report.txt
         
-    - name: Upload Report Artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload Analysis Report
+      # Та самая критическая правка версии v4
+      uses: actions/upload-artifact@v4 
       with:
-        name: build-report
-        path: report.txt
+        name: code-quality-report
+        path: full_report.txt # Указываем тот же файл, что в src/main.py
