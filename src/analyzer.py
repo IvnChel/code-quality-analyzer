@@ -22,6 +22,14 @@ class CodeAnalyzer:
         self._generate_recommendations()
         return self.metrics
 
+    def analyze_folder(self, folder_path):
+        import os
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                if file.endswith(".py"):
+                    full_path = os.path.join(root, file)
+                    self.analyze_file(full_path)
+
     def _analyze_node(self, tree):
         for node in ast.walk(tree):
             # 1. Считаем функции и Docstrings
